@@ -23,8 +23,8 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
         with:
           enable-cache: true
-      - name: Install locked development dependencies
-        run: uv sync --locked --extra dev
+      - name: Install development dependencies (same resolution as upstream CI)
+        run: uv sync --dev --extra dev
       - name: Run configured pre-commit hooks
         run: uv run --no-sync pre-commit run --files dspy/retrievers/embeddings.py dspy/utils/unbatchify.py tests/retrievers/test_embeddings.py tests/utils/test_unbatchify.py
       - name: Run retriever and utility suites

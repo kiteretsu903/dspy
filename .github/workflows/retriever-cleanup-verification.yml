@@ -1,0 +1,31 @@
+name: Retriever cleanup verification
+on:
+  push:
+    branches: [ci-embedding-retriever-cleanup]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: 86521f20e62ee16a1954e7615103b28eba9866c0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          enable-cache: true
+      - name: Install locked development dependencies
+        run: uv sync --locked --extra dev
+      - name: Run configured pre-commit hooks
+        run: uv run --no-sync pre-commit run --files dspy/retrievers/embeddings.py dspy/utils/unbatchify.py tests/retrievers/test_embeddings.py tests/utils/test_unbatchify.py
+      - name: Run retriever and utility suites
+        run: uv run --no-sync pytest -q tests/retrievers tests/utils
